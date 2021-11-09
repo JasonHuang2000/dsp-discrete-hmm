@@ -1,5 +1,6 @@
 #include <hmm.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -122,10 +123,10 @@ struct Sum {
         init_gamma_sum = vd(hmm->state_num, .0);
         gamma_sum = vd(hmm->state_num, .0);
         gamma_sum_for_b = vd(hmm->state_num, .0);
-        gamma_observation_sum = vvd(hmm->state_num, vd(hmm->observ_num, .0));
+        gamma_observation_sum = vvd(hmm->observ_num, vd(hmm->state_num, .0));
         epsilon_sum = vvd(hmm->state_num, vd(hmm->state_num, .0));
     }
-    void updateSum(vi& seq) {
+    void update_sum(vi& seq) {
         int seq_len = seq.size();
         for (int i = 0; i < hmm->state_num; ++i) {
             init_gamma_sum[i] += vars->gamma[0][i];
@@ -135,11 +136,23 @@ struct Sum {
                     epsilon_sum[i][j] += vars->epsilon[t][i][j];
                 }
             }
-            gamma_sum_for_b[i] += (gamma_sum[i] + vars->gamma[seq_len - 1][i]);
         }
         for (int i = 0; i < hmm->state_num; ++i) {
             for (int t = 0; t < seq_len; ++t) {
-                gamma_observation_sum[i][seq[t]] += vars->gamma[t][i];
+                gamma_sum_for_b[i] += vars->gamma[t][i];
+                gamma_observation_sum[seq[t]][i] += vars->gamma[t][i];
+            }
+        }
+    }
+    void update_model_param(int N) {
+        for (int i = 0; i < hmm->state_num; ++i) {
+            hmm->initial[i] = init_gamma_sum[i] / N;
+            for (int j = 0; j < hmm->state_num; ++j) {
+                hmm->transition[i][j] = epsilon_sum[i][j] / gamma_sum[i];
+            }
+            for (int k = 0; k < hmm->observ_num; ++k) {
+                hmm->observation[k][i] =
+                    gamma_observation_sum[k][i] / gamma_sum_for_b[i];
             }
         }
     }
@@ -164,9 +177,10 @@ void train(vvi& seq_arr, HMM& hmm, int iter) {
         sum.init();
         for (vi& seq : seq_arr) {
             vars.calc_vars(seq);
-            sum.updateSum(seq);
+            sum.update_sum(seq);
         }
         // update model
+        sum.update_model_param(seq_arr.size());
     }
 }
 
@@ -199,9 +213,15 @@ int main(int argc, char* argv[]) {
         }
         seq_arr.push_back(seq);
     }
+    training_data.close();
 
     // traning process
     train(seq_arr, hmm, iter);
+
+    // dump model
+    FILE* fp = fopen(output_model_path, "w");
+    dumpHMM(fp, &hmm);
+    fclose(fp);
 
     return 0;
 }
