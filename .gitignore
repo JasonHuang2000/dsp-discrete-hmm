@@ -1,4 +1,5 @@
 result.txt
 train
 test
+validate
 model_0*

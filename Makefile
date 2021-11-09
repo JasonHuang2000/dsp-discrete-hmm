@@ -2,7 +2,7 @@
 CC=g++
 CFLAGS=-std=c++11 -O2
 LDFLAGS=-lm
-TARGET=train test
+TARGET=train test validate
 TRAIN_ITER=100
 INIT_PATH=model_init.txt
 
@@ -12,6 +12,9 @@ train: src/train.cpp
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) -Iinc
 
 test: src/test.cpp
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) -Iinc
+
+validate: src/validate.cpp
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS) -Iinc
 
 run: train
