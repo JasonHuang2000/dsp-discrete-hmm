@@ -58,7 +58,7 @@ struct Variable {
                     // j := current state
                     // k := next state
                     beta[i][j] += (beta[i + 1][k] * hmm->transition[j][k] *
-                                   hmm->observation[seq[i]][j]);
+                                   hmm->observation[seq[i + 1]][k]);
                 }
             }
         }
@@ -66,7 +66,7 @@ struct Variable {
     void calc_gamma(vi& seq) {
         int seq_len = seq.size();
         for (int i = 0; i < seq_len; ++i) {
-            double sum = 0.0;
+            double sum = .0;
             for (int j = 0; j < hmm->state_num; ++j) {
                 // i := current sequence index
                 // j := current state
@@ -106,6 +106,30 @@ struct Variable {
         calc_beta(seq);
         calc_gamma(seq);
         calc_epsilon(seq);
+    }
+
+    void print_vars() {
+        cout << "ALPHA:\n";
+        for (vd& v : alpha) {
+            for (double a : v) {
+                cout << a << ' ';
+            }
+            cout << endl;
+        }
+        cout << "\nBETA:\n";
+        for (vd& v : beta) {
+            for (double a : v) {
+                cout << a << ' ';
+            }
+            cout << endl;
+        }
+        cout << "\nGAMMA:\n";
+        for (vd& v : gamma) {
+            for (double a : v) {
+                cout << a << ' ';
+            }
+            cout << endl;
+        }
     }
     HMM* hmm;
     vvd alpha;
