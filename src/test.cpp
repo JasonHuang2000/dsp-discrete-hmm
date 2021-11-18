@@ -51,7 +51,16 @@ struct Variable {
     vvd delta;
 };
 
-void test(HMM* hmms, vvi seq_arr) {
+struct Result {
+    Result(int idx, double p) {
+        model_idx = idx;
+        prob = p;
+    }
+    int model_idx;
+    double prob;
+};
+
+void test(HMM* hmms, vvi& seq_arr, vector<Result>& res) {
     // length of the sequence
     int seq_len = seq_arr[0].size();
 
@@ -72,7 +81,7 @@ void test(HMM* hmms, vvi seq_arr) {
                 max_model_idx = i;
             }
         }
-        cout << "model_0" << max_model_idx + 1 << ".txt\n";
+        res.push_back(Result(max_model_idx, max_model_prob));
     }
 }
 
@@ -106,7 +115,15 @@ int main(int argc, char* argv[]) {
     }
 
     // testing process
-    test(hmms, seq_arr);
+    vector<Result> res;
+    test(hmms, seq_arr, res);
+
+    // dump result to target file
+    ofstream prediction(output_result_path, fstream::out);
+    for (Result& r : res) {
+        prediction << "model_0" << r.model_idx + 1 << ".txt " << r.prob << endl;
+    }
+    prediction.close();
 
     return 0;
 }
