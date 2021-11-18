@@ -118,13 +118,22 @@ struct Sum {
     Sum(HMM* h, Variable* v) {
         hmm = h;
         vars = v;
+        init_gamma_sum = vd(hmm->state_num);
+        gamma_sum = vd(hmm->state_num);
+        gamma_sum_for_b = vd(hmm->state_num);
+        gamma_observation_sum = vvd(hmm->observ_num, vd(hmm->state_num));
+        epsilon_sum = vvd(hmm->state_num, vd(hmm->state_num));
     }
     void init() {
-        init_gamma_sum = vd(hmm->state_num, .0);
-        gamma_sum = vd(hmm->state_num, .0);
-        gamma_sum_for_b = vd(hmm->state_num, .0);
-        gamma_observation_sum = vvd(hmm->observ_num, vd(hmm->state_num, .0));
-        epsilon_sum = vvd(hmm->state_num, vd(hmm->state_num, .0));
+        fill(init_gamma_sum.begin(), init_gamma_sum.end(), .0);
+        fill(gamma_sum.begin(), gamma_sum.end(), .0);
+        fill(gamma_sum_for_b.begin(), gamma_sum_for_b.end(), .0);
+        for (vd& v : gamma_observation_sum) {
+            fill(v.begin(), v.end(), .0);
+        }
+        for (vd& v : epsilon_sum) {
+            fill(v.begin(), v.end(), .0);
+        }
     }
     void update_sum(vi& seq) {
         int seq_len = seq.size();
