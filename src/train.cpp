@@ -107,30 +107,6 @@ struct Variable {
         calc_gamma(seq);
         calc_epsilon(seq);
     }
-
-    void print_vars() {
-        cout << "ALPHA:\n";
-        for (vd& v : alpha) {
-            for (double a : v) {
-                cout << a << ' ';
-            }
-            cout << endl;
-        }
-        cout << "\nBETA:\n";
-        for (vd& v : beta) {
-            for (double a : v) {
-                cout << a << ' ';
-            }
-            cout << endl;
-        }
-        cout << "\nGAMMA:\n";
-        for (vd& v : gamma) {
-            for (double a : v) {
-                cout << a << ' ';
-            }
-            cout << endl;
-        }
-    }
     HMM* hmm;
     vvd alpha;
     vvd beta;
@@ -249,7 +225,9 @@ int main(int argc, char* argv[]) {
     training_data.close();
 
     // traning process
-    train(seq_arr, hmm, iter);
+    if (!seq_arr.empty()) {
+        train(seq_arr, hmm, iter);
+    }
 
     // dump model
     FILE* fp = fopen(output_model_path, "w");
